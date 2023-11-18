@@ -1,0 +1,90 @@
+name: Build
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      debug:
+        type: string
+        required: true
+      db-schema:
+        type: string
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install Dependencies
+        run: composer install
+        env:
+          APP_ENV: ${{ inputs.environment }}
+          APP_NAME: ${{ secrets.APP_NAME }}
+          APP_KEY: ${{ secrets.APP_KEY }}
+          APP_DEBUG: ${{ inputs.debug }}
+
+      - name: Migrate DB
+        run: |
+          php artisan migrate --force
+        env:
+          APP_ENV: ${{ inputs.environment }}
+          APP_NAME: ${{ secrets.APP_NAME }}
+          APP_KEY: ${{ secrets.APP_KEY }}
+          APP_DEBUG: ${{ inputs.debug }}
+          DB_CONNECTION: pgsql
+          DB_PORT: 5432
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_SCHEMA: ${{ inputs.db-schema }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_ATTR_SSL_CA: /etc/ssl/certs/ca-certificates.crt
+
+      - name: DEV - Deploy to Vercel
+        if: ${{ inputs.environment == 'development' }}
+        run: >
+          vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
+          -e APP_DEBUG=${{ inputs.debug }}
+          -e APP_ENV=${{ inputs.environment }}
+          -e APP_KEY=${{ secrets.APP_KEY }}
+          -e DB_HOST=${{ secrets.DB_HOST }}
+          -e DB_SCHEMA=${{ inputs.db-schema }}
+          -e DB_DATABASE=${{ secrets.DB_DATABASE }}
+          -e DB_USERNAME=${{ secrets.DB_USERNAME }}
+          -e DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # - name: Tag Version
+      #   if: ${{ inputs.environment == 'production' }}
+      #   run: >
+      #     npm version minor -m "[ci skip] v%s";
+      #     VERSION=$(node -p "require('./package.json').version");
+      #     git tag ${VERSION};
+
+      - name: PROD - Deploy to Vercel
+        if: ${{ inputs.environment == 'production' }}
+        run: >
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+          -e APP_DEBUG=${{ inputs.debug }}
+          -e APP_ENV=${{ inputs.environment }}
+          -e APP_KEY=${{ secrets.APP_KEY }}
+          -e DB_HOST=${{ secrets.DB_HOST }}
+          -e DB_SCHEMA=${{ inputs.db-schema }}
+          -e DB_DATABASE=${{ secrets.DB_DATABASE }}
+          -e DB_USERNAME=${{ secrets.DB_USERNAME }}
+          -e DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+

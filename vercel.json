@@ -1,6 +1,12 @@
 {
     "version": 2,
     "framework": null,
+    "git": {
+        "deploymentEnabled": {
+            "main": false,
+            "prod": false
+        }
+    },
     "functions": {
         "api/index.php": { "runtime": "vercel-php@0.6.0" }
     },
@@ -16,9 +22,7 @@
         }
     ],
     "env": {
-        "APP_ENV": "production",
-        "APP_DEBUG": "true",
-        "APP_URL": "https://laravel-vercel-example.jxd.dev",
+        "APP_NAME": "My App",
 
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
@@ -31,8 +35,7 @@
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
 
-        "DB_CONNECTION": "mysql",
-        "DB_PORT": "3306",
+        "DB_CONNECTION": "pgsql",
         "MYSQL_ATTR_SSL_CA": "/etc/pki/tls/certs/ca-bundle.crt"
     }
 }
