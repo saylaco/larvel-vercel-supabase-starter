@@ -1,5 +1,5 @@
-# Laravel Vercel Example
+# Laravel + Vercel + Supabase Example
 
-Example of a Laravel project deployed to Vercel.
+This is a fork of https://github.com/jamiedavenport/laravel-vercel-example, an example of a Laravel project deployed to Vercel.
 
-Read the full tutorial [here](https://www.jxd.dev/blog/laravel-vercel-example).
+Read JXD's full tutorial [here](https://www.jxd.dev/blog/laravel-vercel-example).
